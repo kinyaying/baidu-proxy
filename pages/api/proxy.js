@@ -16,15 +16,28 @@ const apiProxy = createProxyMiddleware({
 })
 
 
-export default function handler (req, res) {
-    console.log("get proxy")
-  apiProxy(req, res, (result) => {
-    console.log('result:', result)
-    if (result instanceof Error) {
-      throw result
+// export default function handler (req, res) {
+//   apiProxy(req, res, (result) => {
+//     console.log('result:', result)
+//     if (result instanceof Error) {
+//       throw result
+//     }
+//     throw new Error(
+//       `Request '${req.url}' is not proxied! We should never reach here!`
+//     )
+//   })
+// }
+
+export default async (req, res) => {
+    const { path } = req.query;
+    
+    try {
+      const { wd } = req.query;  
+      const proxyRes = await fetch(`https://kaifa.baidu.com//rest/v1/search?${wd}`);
+      const data = await proxyRes.json();
+      
+      res.status(200).json(data);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to proxy request' }); 
     }
-    throw new Error(
-      `Request '${req.url}' is not proxied! We should never reach here!`
-    )
-  })
-}
+  }
